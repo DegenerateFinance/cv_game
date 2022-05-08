@@ -28,6 +28,8 @@ counter = 0
 score = 0
 timeStart = time.time()
 totalTime = 120
+lvl1Time = 30
+lvl2Time = 15
 
 # Loop
 while True:
@@ -50,10 +52,7 @@ while True:
             distanceCM = A * distance ** 2 + B * distance + C
 
             #print(distance/distanceCM)
-
-
-            # print(distanceCM, distance)
-
+            print(lmList[0])
             if distanceCM < 40:
                 if x < cx < x + w and y < cy < y + h:
                     counter = 1
@@ -77,8 +76,10 @@ while True:
         cv2.circle(img, (cx, cy), 30, (50, 50, 50), 2)
 
         # Game HUD
-        cvzone.putTextRect(img, f'Time: {int(totalTime-(time.time()-timeStart))}',
-                           (1000, 75), scale=3, offset=20)
+        cvzone.putTextRect(img, f'Total Time: {int(totalTime-(time.time()-timeStart))}',
+                           (800, 75), scale=3, offset=20)
+        cvzone.putTextRect(img, f'Time: {int(lvl2Time-(time.time()-timeStart))}',
+                           (1000, 125), scale=3, offset=20)
         cvzone.putTextRect(img, f'Score: {str(score).zfill(2)}', (60, 75), scale=3, offset=20)
     else:
         cvzone.putTextRect(img, 'Game Over', (400, 400), scale=5, offset=30, thickness=7)
