@@ -10,7 +10,7 @@ import time
 cap = cv2.VideoCapture(0)
 cap.set(3, 1280)
 cap.set(4, 720)
-
+key = 0
 # Hand Detector
 detector = HandDetector(detectionCon=0.8, maxHands=2)
 
@@ -32,12 +32,16 @@ lvl1Time = 30
 lvl2Time = 15
 cicleCount = 0
 
+#z distance 70cm
+#total x pixels / total x at 70cm   1280px/80cm
+#total y pixels / total y at 70cm   720px/40cm
+
+
 # Loop
-while True:
+while key != 27:
     cicleCount += 1
     success, img = cap.read()
     img = cv2.flip(img, 1)
-
     if time.time()-timeStart < totalTime:
 
         hands = detector.findHands(img, draw=False)
@@ -47,6 +51,7 @@ while True:
             x, y, w, h = hands[0]['bbox']
             x1, y1 = lmList[8][:2]
             x2, y2 = lmList[17][:2]
+            wristX, wristY =lmList[0][:2]
 
             distance = int(math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2))
 
@@ -55,9 +60,19 @@ while True:
 
             #print(distance/distanceCM)
 
-            #WE CAN CALCULATE ACC AND SPEED FETCHING
+#WE CAN CALCULATE ACC AND SPEED FETCHING TIME AND POSITION, WILL CALCULATE WRIST hands[0]
+#VELOCITY AND ACCELERATION
+            timeZero = 0
+            timeOne = 0
             if cicleCount % 3 == 0:
-                print(cicleCount)
+                timeZero=time.time()
+            if cicleCount % 3 == 1:
+                timeOne=time.time()-timeZero
+                print(wristX, wristY)
+#            if cicleCount % 3 == 2:
+#                timeOne=time.time()-timeZero
+#                print(timeOne)
+
             if distanceCM < 40:
                 if x < cx < x + w and y < cy < y + h:
                     counter = 1
@@ -99,3 +114,4 @@ while True:
     if key == ord('r'):
         timeStart = time.time()
         score = 0
+
