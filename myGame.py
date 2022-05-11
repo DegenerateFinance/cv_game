@@ -33,12 +33,24 @@ cicleCount = 0
 
 key = 0
 setup = 0
+
+#setup variables
 #z distance 70cm
 #total x pixels / total x at 70cm   1280px/80cm
 #total y pixels / total y at 70cm   720px/50cm
-
-
-# Loop
+px2cmX= 1/16
+px2cmY= 1/14.4
+#support variables
+countDown = 0
+timeZero = 0
+timeOne = 0
+wrist0x = 0
+wrist0y = 0
+wrist1x = 0
+wrist1y = 0
+maxSpeed = 0
+maxAcc = 0
+# Game Loop
 while key != 27:
     success, img = cap.read()
     img = cv2.flip(img, 1)
@@ -57,6 +69,8 @@ while key != 27:
             timeStart = time.time()
             score = 0
             setup = 1
+            maxSpeed = 0
+            maxAcc = 0
             cx = random.randint(640-lvl1RangeX, 640+lvl1RangeX)
             cy = random.randint(360-lvl1RangeY, 360+lvl1RangeY)
     if setup == 1:
@@ -74,6 +88,28 @@ while key != 27:
                 if hands:
                     lmList = hands[0]['lmList']
                     wristX, wristY =lmList[0][:2]
+                    cicleCount += 1
+                    if cicleCount % 3 == 0:
+                        timeZero=time.time()
+                        wrist0x=wristX
+                        wrist0y=wristY
+                    if cicleCount % 3 == 1:
+                        timeOne=time.time()-timeZero
+                        wrist1x=wristX-wrist0x
+                        wrist1y=wristY-wrist0y
+                        wristOne=math.sqrt((wrist1x*px2cmX)**2+(wrist1y*px2cmY)**2) #distance from points cm
+                        speed1=round(wristOne/timeOne, 3)   #speed cm/s
+                        if speed1 > maxSpeed:
+                            maxSpeed = speed1
+                    if cicleCount % 3 == 2:
+                        timeTwo=time.time()-timeZero
+                        wrist2x=wristX-wrist1x
+                        wrist2y=wristY-wrist1y
+                        wristTwo=math.sqrt((wrist2x*px2cmX)**2+(wrist2y*px2cmY)**2) #distance from points cm
+                        speed2=round(wristTwo/(timeTwo-timeOne), 2)
+                        Acceleration = round(abs((speed2-speed1)/(timeTwo-timeOne)),2)   #Acc in cm/s²
+                        if Acceleration > maxAcc:
+                            maxAcc = Acceleration
                     #draws DOT on wrist position
                     cv2.circle(img, (wristX, wristY), 10, magenta, cv2.FILLED)
 
@@ -81,8 +117,12 @@ while key != 27:
                     if cx-lvl1Size<wristX<cx+lvl1Size and cy-lvl1Size<wristY<cy+lvl1Size:
                         if time.time()-countDown > 2:
                             score +=1
+                            #export data
+                            print (score, round(time.time()-timeStart, 3), cx, cy, maxSpeed, maxAcc)
                             timeStart = time.time()
                             countDown=time.time()
+                            maxSpeed = 0
+                            maxAcc = 0
                             cx = random.randint(640-lvl1RangeX, 640+lvl1RangeX)
                             cy = random.randint(360-lvl1RangeY, 360+lvl1RangeY)
                             if score >=5:
@@ -114,6 +154,8 @@ while key != 27:
                     if cx-lvl2Size<wristX<cx+lvl2Size and cy-lvl2Size<wristY<cy+lvl2Size:
                         if time.time()-countDown > 2:
                             score +=1
+                            #export data
+                            print (score, round(time.time()-timeStart, 3), wristX, wristY)
                             timeStart = time.time()
                             countDown=time.time()
                             cx = random.randint(640-lvl2RangeX, 640+lvl2RangeX)
