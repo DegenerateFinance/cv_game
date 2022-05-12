@@ -56,7 +56,7 @@ maxSpeed = 0
 maxAcc = 0
 # Game Loop
 with open ('file.csv', 'w', newline='') as csvfile:
-    fieldnames= ['Score','Time Spent','PositionX(px)','PositionY(px)', 'maxSpeed', 'maxAcceleration']
+    fieldnames= ['Score','Time Spent','PositionX(px)','PositionY(px)', 'maxSpeed(cm/s)', 'maxAcceleration(cm/s²)']
     thewriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
     thewriter.writeheader()
     while key != 27:
@@ -127,7 +127,7 @@ with open ('file.csv', 'w', newline='') as csvfile:
                                 score +=1
                                 #export data
                                 print (score, round(time.time()-timeStart, 3), wristX, wristY, maxSpeed, maxAcc)
-                                thewriter.writerow({'Score':score,'Time Spent':round(time.time()-timeStart, 3),'PositionX(px)':wristX,'PositionY(px)':wristY, 'maxSpeed':maxSpeed, 'maxAcceleration':maxAcc})
+                                thewriter.writerow({'Score':score,'Time Spent':round(time.time()-timeStart, 3),'PositionX(px)':wristX,'PositionY(px)':wristY, 'maxSpeed(cm/s)':maxSpeed, 'maxAcceleration(cm/s²)':maxAcc})
                                 timeStart = time.time()
                                 countDown=time.time()
                                 maxSpeed = 0
@@ -156,6 +156,28 @@ with open ('file.csv', 'w', newline='') as csvfile:
                     if hands:
                         lmList = hands[0]['lmList']
                         wristX, wristY =lmList[0][:2]
+                        cicleCount += 1
+                        if cicleCount % 3 == 0:
+                            timeZero=time.time()
+                            wrist0x=wristX
+                            wrist0y=wristY
+                        if cicleCount % 3 == 1:
+                            timeOne=time.time()-timeZero
+                            wrist1x=wristX-wrist0x
+                            wrist1y=wristY-wrist0y
+                            wristOne=math.sqrt((wrist1x*px2cmX)**2+(wrist1y*px2cmY)**2) #distance from points cm
+                            speed1=round(wristOne/timeOne, 3)   #speed cm/s
+                            if speed1 > maxSpeed:
+                                maxSpeed = speed1
+                        if cicleCount % 3 == 2:
+                            timeTwo=time.time()-timeZero
+                            wrist2x=wristX-wrist1x
+                            wrist2y=wristY-wrist1y
+                            wristTwo=math.sqrt((wrist2x*px2cmX)**2+(wrist2y*px2cmY)**2) #distance from points cm
+                            speed2=round(wristTwo/(timeTwo-timeOne), 2)
+                            Acceleration = round(abs((speed2-speed1)/(timeTwo-timeOne)),2)   #Acc in cm/s²
+                            if Acceleration > maxAcc:
+                                maxAcc = Acceleration
                         #draws DOT on wrist position
                         cv2.circle(img, (wristX, wristY), 10, magenta, cv2.FILLED)
 
@@ -165,8 +187,11 @@ with open ('file.csv', 'w', newline='') as csvfile:
                                 score +=1
                                 #export data
                                 print (score, round(time.time()-timeStart, 3), wristX, wristY)
+                                thewriter.writerow({'Score':score,'Time Spent':round(time.time()-timeStart, 3),'PositionX(px)':wristX,'PositionY(px)':wristY, 'maxSpeed(cm/s)':maxSpeed, 'maxAcceleration(cm/s²)':maxAcc})
                                 timeStart = time.time()
                                 countDown=time.time()
+                                maxSpeed = 0
+                                maxAcc = 0
                                 cx = random.randint(640-lvl2RangeX, 640+lvl2RangeX)
                                 cy = random.randint(360-lvl2RangeY, 360+lvl2RangeY)
                         else:
