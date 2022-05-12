@@ -24,14 +24,15 @@ magenta = (255, 0, 255)
 score = 0
 timeStart = 0
 totalTime = 120
-lvl1Time = 10
+lvl1Time = 30
 lvl1RangeX = 128 #range in pixels
 lvl1RangeY = 72
-lvl1Size = 100  #l/2 in px
-lvl2Time = 7
+lvl1Size = 75  #l/2 in px
+lvl2Score = 6
+lvl2Time = 20
 lvl2RangeX = 256
 lvl2RangeY = 144
-lvl2Size= 75
+lvl2Size= 50
 cicleCount = 0
 
 key = 0
@@ -83,7 +84,7 @@ with open ('file.csv', 'w', newline='') as csvfile:
         if setup == 1:
             #game start
             #lvl1
-            if score < 5:
+            if score < lvl2Score:
                 hands = detector.findHands(img, draw=False)
                 if time.time()-timeStart <= lvl1Time:
                     #draws rectangle
@@ -143,7 +144,7 @@ with open ('file.csv', 'w', newline='') as csvfile:
                     setup = 2
                     timeStart=time.time()
             #lvl2
-            if score >=5:
+            if score >=lvl2Score:
                 hands = detector.findHands(img, draw=False)
                 if time.time()-timeStart <= lvl2Time:
                     #draws rectangle
